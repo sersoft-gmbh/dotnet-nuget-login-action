@@ -17,6 +17,7 @@ async function main() {
     const storePasswordInCleartext = core.getBooleanInput('store-password-in-cleartext',
         {required: !!password});
     const configFilePath = core.getInput('config-file');
+    if (!username && password) throw new Error('Password cannot be set without username');
     core.endGroup();
 
     await core.group('Add registry', async () => {
