@@ -30,7 +30,7 @@ jobs:
         with:
           registry-url: 'https://nuget.pkg.github.com/sersoft-gmbh/index.json'
           registry-name: github
-          username: ${{ secrets.GITHUB_ACTOR }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           store-password-in-cleartext: true
       - uses: './'
@@ -39,6 +39,6 @@ jobs:
         with:
           registry-url: 'https://nuget.pkg.github.com/sersoft-gmbh/index.json'
           registry-name: github
-          username: ${{ secrets.GITHUB_ACTOR }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           store-password-in-cleartext: true
