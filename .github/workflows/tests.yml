@@ -1,0 +1,39 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'dist/*.js'
+      - '.github/workflows/tests.yml'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-gh-registry:
+    name: Test GitHub Registry
+    strategy:
+      matrix:
+        os: [ 'ubuntu-latest', 'macos-latest', 'windows-latest' ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate action code
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: ./.github/actions/generate-action-code
+      - uses: sersoft-gmbh/dotnet-nuget-login-action@main
+        if: ${{ github.event_name == 'push' }}
+        id: main-action
+        with:
+          registry-url: 'https://nuget.pkg.github.com'
+          registry-name: 'github'
+          username: ${{ secrets.GITHUB_ACTOR }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: './'
+        if: ${{ github.event_name == 'pull_request' }}
+        id: local-action
+        with:
+          registry-url: 'https://nuget.pkg.github.com'
+          registry-name: 'github'
+          username: ${{ secrets.GITHUB_ACTOR }}
+          password: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,30 @@
+name: Dotnet Nuget Login
+description: Login to a NuGet registry.
+author: ser.soft GmbH
+inputs:
+  registry-url:
+    description: The NuGet registry to log in to.
+    required: true
+  registry-name:
+    description: The name of the registry to log in to.
+    required: true
+  username:
+    description: The username to use for the login.
+    required: false
+  password:
+    description: The password to use for the login.
+    required: false
+  store-password-in-cleartext:
+    description: Whether to store the password in cleartext. The cleanup of this action will remove it again.
+    required: false
+    default: 'true'
+  config-file:
+    description: The path to the NuGet configuration file. Uses the default config file by default.
+    required: false
+runs:
+  using: node20
+  main: dist/index.js
+  post: dist/post.js
+branding:
+  color: blue
+  icon: log-in
