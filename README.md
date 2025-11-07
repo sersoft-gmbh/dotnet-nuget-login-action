@@ -39,7 +39,7 @@ Equivalent to the `--configfile` parameter of the `nuget sources add` command.
 ## Example Usage
 
 ```yaml
-uses: sersoft-gmbh/dotnet-nuget-login-action@v1
+uses: sersoft-gmbh/dotnet-nuget-login-action@v2
 with:
     registry-url: 'https://nuget.example.com/v3/index.json'
     registry-name: example
