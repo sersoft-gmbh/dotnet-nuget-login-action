@@ -1,11 +1,8 @@
-import * as core from '@actions/core';
-import {getExecOutput} from '@actions/exec';
+import * as core from "@actions/core";
+import {exec} from "@actions/exec";
 
-async function runCmd(cmd: string, ...args: string[]): Promise<string> {
-    const output = await getExecOutput(cmd, args.length <= 0 ? undefined : args, {
-        silent: !core.isDebug(),
-    });
-    return output.stdout;
+async function runCmd(cmd: string, ...args: string[]): Promise<void> {
+    await exec(cmd, args.length <= 0 ? undefined : args, {silent: !core.isDebug()});
 }
 
 async function main() {
@@ -35,7 +32,8 @@ async function main() {
             args.push('--password', password);
             if (storePasswordInCleartext) args.push('--store-password-in-clear-text');
         }
-        if (configFilePath) args.push('--configfile', configFilePath);
+        if (configFilePath) // noinspection SpellCheckingInspection
+            args.push('--configfile', configFilePath);
         await runCmd('dotnet', ...args);
     });
 }
@@ -51,9 +49,8 @@ async function post() {
 try {
     const isPost = !!core.getState('isPost');
     // Mark the next run as post
-    if (!isPost) core.saveState('isPost', 'true')
-    if (isPost) post().catch((error) => core.setFailed(error.message));
-    else main().catch((error) => core.setFailed(error.message));
+    if (!isPost) core.saveState('isPost', 'true');
+    (isPost ? post() : main()).catch((error) => core.setFailed(error.message));
 } catch (error: any) {
     core.setFailed(error.message);
 }

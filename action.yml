@@ -22,7 +22,7 @@ inputs:
     description: The path to the NuGet configuration file. Uses the default config file by default.
     required: false
 runs:
-  using: node20
+  using: node24
   main: dist/index.js
   post: dist/index.js
 branding:
