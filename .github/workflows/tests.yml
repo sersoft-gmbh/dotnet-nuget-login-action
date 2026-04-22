@@ -38,7 +38,7 @@ jobs:
           NG_SOURCE: 'https://nuget.pkg.github.com/sersoft-gmbh/index.json'
           NG_USERNAME: bad_user
           NG_PASSWORD: bad_pw
-        run: dotnet nuget add source --name "${NG_NAME}" --username "${NG_USERNAME}" --password "${NG_PASSWORD}" --store-password-in-cleartext --source "${NG_SOURCE}"
+        run: dotnet nuget add source "${NG_SOURCE}" --name "${NG_NAME}" --username "${NG_USERNAME}" --password "${NG_PASSWORD}" --store-password-in-clear-text"
       - uses: sersoft-gmbh/dotnet-nuget-login-action@main
         if: ${{ github.event_name == 'push' }}
         id: main-action
