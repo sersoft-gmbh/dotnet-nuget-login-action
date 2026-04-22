@@ -19,9 +19,9 @@ async function main() {
   if (!username && password) throw new Error('Password cannot be set without username');
   core.endGroup();
 
-  core.saveState('registryName', registryName);
-  core.saveState('update', update ? 'true' : 'false');
   core.saveState('postStepNeeded', !update || (username || password) ? 'true' : 'false');
+  core.saveState('update', update ? 'true' : 'false');
+  core.saveState('registryName', registryName);
   if (configFilePath) core.saveState('configFilePath', configFilePath);
 
   await core.group(`${update ? 'Update' : 'Add'} registry`, async () => {
