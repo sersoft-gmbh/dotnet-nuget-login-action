@@ -20,30 +20,42 @@ jobs:
     strategy:
       matrix:
         os: [ 'ubuntu-latest', 'macos-latest', 'windows-latest' ]
+        mode: [ 'env-credentials', 'update' ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0'
+          dotnet-version: '10.0'
       - name: Generate action code
         if: ${{ github.event_name == 'pull_request' }}
         uses: ./.github/actions/generate-action-code
+      - name: Setup source initially
+        if: ${{ matrix.mode == 'update' }}
+        shell: bash
+        env:
+          NG_NAME: github
+          NG_SOURCE: 'https://nuget.pkg.github.com/sersoft-gmbh/index.json'
+          NG_USERNAME: bad_user
+          NG_PASSWORD: bad_pw
+        run: dotnet nuget add source --name "${NG_NAME}" --username "${NG_USERNAME}" --password "${NG_PASSWORD}" --store-password-in-cleartext --source "${NG_SOURCE}"
       - uses: sersoft-gmbh/dotnet-nuget-login-action@main
         if: ${{ github.event_name == 'push' }}
         id: main-action
         with:
+          update: ${{ matrix.mode == 'update' }}
           registry-url: 'https://nuget.pkg.github.com/sersoft-gmbh/index.json'
           registry-name: github
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ case(matrix.mode == 'env-credentials', '%GITHUB_ACTOR%', github.actor) }}
+          password: ${{ case(matrix.mode == 'env-credentials', '%GITHUB_TOKEN%', secrets.GITHUB_TOKEN) }}
           store-password-in-cleartext: true
       - uses: './'
         if: ${{ github.event_name == 'pull_request' }}
         id: local-action
         with:
+          update: ${{ matrix.mode == 'update' }}
           registry-url: 'https://nuget.pkg.github.com/sersoft-gmbh/index.json'
           registry-name: github
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ case(matrix.mode == 'env-credentials', '%GITHUB_ACTOR%', github.actor) }}
+          password: ${{ case(matrix.mode == 'env-credentials', '%GITHUB_TOKEN%', secrets.GITHUB_TOKEN) }}
           store-password-in-cleartext: true

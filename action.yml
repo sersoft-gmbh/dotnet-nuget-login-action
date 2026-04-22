@@ -2,12 +2,19 @@ name: Dotnet Nuget Login
 description: Login to a NuGet registry.
 author: ser.soft GmbH
 inputs:
-  registry-url:
-    description: The NuGet registry to log in to.
-    required: true
+  update:
+    description: Whether to update the existing credentials for the registry. If false, the action will fail if the source already exist.
+    required: false
+    default: 'false'
   registry-name:
     description: The name of the registry to log in to.
     required: true
+  registry-url:
+    description: The NuGet registry to log in to. Required if `update` is false!
+    required: false
+  protocol-version:
+    description: The protocol version to use for the registry.
+    required: false
   username:
     description: The username to use for the login.
     required: false
