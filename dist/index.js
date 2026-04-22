@@ -30912,9 +30912,9 @@ async function main() {
     if (!username && password)
         throw new Error('Password cannot be set without username');
     endGroup();
-    saveState('registryName', registryName);
-    saveState('update', update ? 'true' : 'false');
     saveState('postStepNeeded', !update || (username || password) ? 'true' : 'false');
+    saveState('update', update ? 'true' : 'false');
+    saveState('registryName', registryName);
     if (configFilePath)
         saveState('configFilePath', configFilePath);
     await group(`${update ? 'Update' : 'Add'} registry`, async () => {
