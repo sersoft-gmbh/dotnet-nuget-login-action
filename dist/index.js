@@ -30901,8 +30901,10 @@ async function runCmd(cmd, ...args) {
 }
 async function main() {
     startGroup('Validate input');
-    const registryUrl = getInput('registry-url', { required: true });
+    const update = getBooleanInput('update', { required: true });
     const registryName = getInput('registry-name', { required: true });
+    const registryUrl = getInput('registry-url', { required: !update });
+    const protocolVersion = getInput('protocol-version');
     const username = getInput('username');
     const password = getInput('password', { required: !!username });
     const storePasswordInCleartext = getBooleanInput('store-password-in-cleartext', { required: !!password });
@@ -30910,16 +30912,21 @@ async function main() {
     if (!username && password)
         throw new Error('Password cannot be set without username');
     endGroup();
-    await group('Add registry', async () => {
-        saveState('registryName', registryName);
-        let args = [
-            'nuget',
-            'add',
-            'source',
-            registryUrl,
-            '--name',
-            registryName,
-        ];
+    saveState('registryName', registryName);
+    saveState('update', update ? 'true' : 'false');
+    saveState('postStepNeeded', !update || (username || password) ? 'true' : 'false');
+    if (configFilePath)
+        saveState('configFilePath', configFilePath);
+    await group(`${update ? 'Update' : 'Add'} registry`, async () => {
+        let args = ['nuget'];
+        if (update) {
+            args.push('update', 'source', registryName);
+            if (registryUrl)
+                args.push('--source', registryUrl);
+        }
+        else {
+            args.push('add', 'source', registryUrl, '--name', registryName);
+        }
         if (username)
             args.push('--username', username);
         if (password) {
@@ -30927,16 +30934,31 @@ async function main() {
             if (storePasswordInCleartext)
                 args.push('--store-password-in-clear-text');
         }
+        if (protocolVersion)
+            args.push('--protocol-version', protocolVersion);
         if (configFilePath) // noinspection SpellCheckingInspection
             args.push('--configfile', configFilePath);
         await runCmd('dotnet', ...args);
     });
 }
 async function post() {
-    await group('Remove registry', async () => {
+    const postStepNeeded = getState('postStepNeeded') === 'true';
+    if (!postStepNeeded)
+        return;
+    const update = getState('update') === 'true';
+    await group(`Remove registry${update ? ' credentials' : ''}`, async () => {
         const registryName = getState('registryName');
-        if (registryName)
-            await runCmd('dotnet', 'nuget', 'remove', 'source', registryName);
+        if (registryName) {
+            const configFilePath = getState('configFilePath');
+            let args = ['nuget'];
+            if (update)
+                args.push('update', 'source', registryName, '--store-password-in-clear-text', '--username', '', '--password', '');
+            else
+                args.push('remove', 'source', registryName);
+            if (configFilePath) // noinspection SpellCheckingInspection
+                args.push('--configfile', configFilePath);
+            await runCmd('dotnet', ...args);
+        }
     });
 }
 try {
